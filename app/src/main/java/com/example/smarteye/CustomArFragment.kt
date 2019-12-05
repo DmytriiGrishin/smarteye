@@ -7,6 +7,7 @@ import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
+import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
@@ -18,6 +19,10 @@ import com.google.ar.sceneform.FrameTime
 import com.google.ar.sceneform.rendering.ModelRenderable
 import com.google.ar.sceneform.rendering.Renderable
 import com.google.ar.sceneform.ux.TransformableNode
+import com.google.ar.core.Pose
+import com.google.ar.core.Anchor
+
+
 
 
 open class CustomArFragment: ArFragment() {
@@ -27,10 +32,28 @@ open class CustomArFragment: ArFragment() {
         val view = super.onCreateView(inflater, container, savedInstanceState)
         planeDiscoveryController.hide()
         planeDiscoveryController.setInstructionView(null)
-        arSceneView.planeRenderer.isEnabled = false
+        arSceneView.planeRenderer.isEnabled = true
         arSceneView.isLightEstimationEnabled = false
+        setOnTapArPlaneListener(this::handleTap)
         initializeSession()
+//        val session = getArSceneView().getSession()
+//        val pos = floatArrayOf(0f, 0f, -1f)
+//        val rotation = floatArrayOf(0f, 0f, 0f, 1f)
+//        val anchor = session!!.createAnchor(Pose(pos, rotation))
+//        //val anchorNode = AnchorNode(anchor)
+//        placeObject(
+//            anchor,
+//            Uri.parse("box.sfb")
+//                    )
         return view
+    }
+    private fun handleTap(hitResult: HitResult, plane: Plane , motionEvent: MotionEvent ) {
+        val anchor = hitResult.createAnchor()
+        Log.i("tap","tap")
+        placeObject(
+            anchor,
+            Uri.parse("box.sfb")
+        )
     }
 
     override fun getSessionConfiguration(session: Session): Config {
@@ -46,30 +69,46 @@ open class CustomArFragment: ArFragment() {
     }
 
     fun setupAugmentedImagesDb(config: Config, session: Session): Boolean {
-        val augmentedImageDatabase = AugmentedImageDatabase(session)
-        val bitmap = loadAugmentedImage()
-        augmentedImageDatabase.addImage("tiger", bitmap)
-        config.augmentedImageDatabase = augmentedImageDatabase
+//        val augmentedImageDatabase = AugmentedImageDatabase(session)
+//        val bitmap = loadAugmentedImage()
+//        augmentedImageDatabase.addImage("tiger", bitmap)
+//        config.augmentedImageDatabase = augmentedImageDatabase
         return true
     }
 
     override fun onUpdate(frameTime: FrameTime) {
         val frame = arSceneView.arFrame
         Log.i("onUpdate","frame updated")
-        val augmentedImages = frame!!.getUpdatedTrackables(AugmentedImage::class.java)
-        for (augmentedImage in augmentedImages) {
-            if (augmentedImage.trackingState == TrackingState.TRACKING) {
-                if (augmentedImage.name == "tiger" && shouldAddModel) {
-                    Log.i("onUpdate","detected")
-
-                    placeObject(
-                        augmentedImage.createAnchor(augmentedImage.getCenterPose()),
-                        Uri.parse("haunter.sfb")
-                    )
-                    shouldAddModel = false
-                }
-            }
-        }
+        val planes = frame!!.getUpdatedTrackables(Plane::class.java)
+//        for (plane in planes) {
+//            if (plane.trackingState == TrackingState.TRACKING) {
+//                if (shouldAddModel) {
+//                    //Get all added anchors to the frame
+//                    val iterableAnchor = frame.updatedAnchors.iterator()
+//
+//                    //place the first object only if no previous anchors were added
+//                    if(!iterableAnchor.hasNext()) {
+//                        //Perform a hit test at the center of the screen to place an object without tapping
+//                        val hitTest = frame.hitTest(0F, 0F)
+//
+//                        //iterate through all hits
+//                        val hitTestIterator = hitTest.iterator()
+//                        while(hitTestIterator.hasNext()) {
+//                            val hitResult = hitTestIterator.next()
+//                            Log.i("onUpdate","datected")
+//                            //Create an anchor at the plane hit
+//                            val modelAnchor = plane.createAnchor(hitResult.hitPose)
+//                            placeObject(
+//                                modelAnchor,
+//                                Uri.parse("box.sfb")
+//                            )
+//                        }
+//                    }
+//
+//                    shouldAddModel = false
+//                }
+//            }
+//        }
     }
 
     @RequiresApi(api = Build.VERSION_CODES.N)

@@ -48,3 +48,8 @@ sceneform.asset('sampledata/haunter/model-triangulated.obj',
         'default',
         'sampledata/haunter/model-triangulated.sfa',
         'src/main/assets/haunter')
+
+sceneform.asset('sampledata/box/box.obj',
+        'default',
+        'sampledata/box/box.sfa',
+        'src/main/assets/box')
